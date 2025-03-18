@@ -17,9 +17,8 @@ class DatabaseHelper2 {
   static const columnCategory = 'category';
 
   // Make the DatabaseHelper2 class a singleton
-  static final DatabaseHelper2 _instance =
-      DatabaseHelper2._privateConstructor();
-  static Database ? _database;
+  static final DatabaseHelper2 _instance =  DatabaseHelper2._privateConstructor();
+  static Database? _database;
 
   DatabaseHelper2._privateConstructor(); // Private named constructor to prevent multiple instances.
 
@@ -40,10 +39,11 @@ class DatabaseHelper2 {
 
   // Initialize the database
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'items.db');
+    String path = join(await getDatabasesPath(), _databaseName);
     return openDatabase(
       path,
       onCreate: (db, version) {
+
         return db.execute('''
           CREATE TABLE items(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +57,7 @@ class DatabaseHelper2 {
           )
           ''');
       },
-      version: 1,
+      version: _databaseVersion,
     );
   }
 
@@ -102,7 +102,7 @@ class DatabaseHelper2 {
   }
 
   // Delete an item by ID
-  Future<int> deleteItem(int id) async {
+  Future<int> deleteItem(int? id) async {
     Database db = await database;
     return await db.delete('items', where: 'id = ?', whereArgs: [id]);
   }

@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:test_app/db/database_helper.dart';
+import 'package:test_app/helpers/database_helper.dart';
 import 'package:test_app/models/item.dart';
 
-void main() {
-  runApp(MyApp());
-}
+// void main() {
+//   runApp(MyApp());
+// }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: FormPage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+//   // This widget is the root of your application.
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Flutter Demo',
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+//       ),
+//       home: FormPage(title: 'Flutter Demo Home Page'),
+//     );
+//   }
+// }
 
 class FormPage extends StatelessWidget {
   final String title;
-  const FormPage({required this.title, Key? key}) : super(key: key);
+  final Item? item;
+
+  const FormPage({required this.title, Key? key, this.item}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,7 @@ class FormPage extends StatelessWidget {
       appBar: AppBar(title: Text(title), centerTitle: true),
       body: Container(
         padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: ItemForm(),
+        child: ItemForm(item: item,),
       ),
     );
   }
@@ -58,6 +63,21 @@ class _ItemFormState extends State<ItemForm> {
   String? _selectedCategory;
 
   final List<String> _categories = ['Electronics', 'Clothing', 'Groceries'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.item != null) {
+      _nameController.text = widget.item!.name;
+      _quantityController.text = widget.item!.quantity.toString();
+      _priceController.text = widget.item!.price.toString();
+      _inStock = widget.item!.isStock;
+      _expirationDate = widget.item!.expirationDate;
+      _selectedCategory = widget.item!.category;
+      _descriptionController.text = widget.item!.description;
+    }
+  }
 
 
 Future<void> _selectDate(BuildContext context) async {
@@ -202,7 +222,7 @@ SizedBox(height: 20,),
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
                   final item = Item(
                     name: _nameController.text,
@@ -214,13 +234,18 @@ SizedBox(height: 20,),
                     category: _selectedCategory!,
                   );
 
-                  print('Item: $item');
+                  // print('Item: $item');
+
+
 
                   if (widget.item == null) {
                     // Add item
-                    print('Adding item: $item');
+                    int abc = await DatabaseHelper2().insertItem(item);
+                    print( abc );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FormPage(title: 'Add Item')));
                   } else {
                     // Update item
+                    await DatabaseHelper2().updateItem(item);
                     print('Updating item: $item');
                   }
                 }
